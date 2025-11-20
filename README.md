@@ -1,6 +1,6 @@
 # Freelance Marketplace
 
-A modern freelancer marketplace application built with Next.js, TypeScript, Prisma, and Tailwind CSS.
+Repository for testing security scanning on a demo application, now populated with a full-featured freelance marketplace built with Next.js, TypeScript, Prisma, and Tailwind CSS.
 
 ## Features
 
@@ -135,4 +135,3 @@ Optional (for payments):
 ## License
 
 MIT
-

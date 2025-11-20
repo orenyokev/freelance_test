@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    @default("CUSTOMER") // FREELANCER, CUSTOMER, ADMIN
+  avatar        String?
+  bio           String?
+  skills        String?   // JSON array for freelancers
+  rating        Float     @default(0)
+  totalProjects Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  projects      Project[]
+  offerings     Offering[]
+  bids          Bid[]
+  paymentsAsCustomer Payment[] @relation("CustomerPayments")
+  paymentsAsFreelancer Payment[] @relation("FreelancerPayments")
+  messages      Message[]
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  budget      Float
+  deadline    DateTime?
+  status      String        @default("DRAFT") // DRAFT, OPEN, IN_PROGRESS, COMPLETED, CANCELLED
+  featured    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  customerId  String
+  customer    User          @relation(fields: [customerId], references: [id])
+  bids        Bid[]
+  payments    Payment[]
+  messages    Message[]
+}
+
+model Offering {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  category    String
+  status      String         @default("ACTIVE") // ACTIVE, INACTIVE
+  featured    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  freelancerId String
+  freelancer   User           @relation(fields: [freelancerId], references: [id])
+}
+
+model Bid {
+  id          String   @id @default(cuid())
+  amount      Float
+  proposal    String
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  freelancerId String
+  freelancer  User     @relation(fields: [freelancerId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float
+  status        String        @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  stripeId      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  projectId     String
+  project       Project       @relation(fields: [projectId], references: [id])
+  customerId    String
+  customer      User          @relation("CustomerPayments", fields: [customerId], references: [id])
+  freelancerId  String
+  freelancer    User          @relation("FreelancerPayments", fields: [freelancerId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
